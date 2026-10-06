@@ -16,7 +16,6 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Reçoit l'image et la question, les confie à l'agent et renvoie la réponse.
@@ -26,7 +25,7 @@ import java.util.List;
 @RequestMapping("/api/descriptions")
 public class DescriptionControleur {
 
-    private static final List<String> TYPES_ACCEPTES = List.of("image/jpeg", "image/png", "image/webp", "image/gif");
+    static final int QUESTION_MAX = 500;
 
     private final DescripteurImage descripteur;
 
@@ -39,18 +38,20 @@ public class DescriptionControleur {
                                                       @RequestParam(value = "question", required = false) String question)
             throws IOException, DescriptionImpossibleException {
 
-        if (fichier.isEmpty()) {
-            return erreur(HttpStatus.BAD_REQUEST, "Le fichier choisi est vide. Choisissez une autre image.");
-        }
-        if (!TYPES_ACCEPTES.contains(fichier.getContentType())) {
-            return erreur(HttpStatus.BAD_REQUEST,
-                    "Ce type de fichier n'est pas pris en charge. Choisissez une image JPEG, PNG, WebP ou GIF.");
+        Image image;
+        try {
+            image = new Image(fichier.getBytes(), fichier.getContentType());
+        } catch (IllegalArgumentException e) {
+            return erreur(HttpStatus.BAD_REQUEST, e.getMessage());
         }
 
         String questionNettoyee = question == null || question.isBlank() ? null : question.strip();
-        Image image = new Image(fichier.getBytes(), fichier.getContentType());
-        Description description = descripteur.decrire(image, questionNettoyee);
+        if (questionNettoyee != null && questionNettoyee.length() > QUESTION_MAX) {
+            return erreur(HttpStatus.BAD_REQUEST,
+                    "La question est trop longue. Limitez-la à " + QUESTION_MAX + " caractères.");
+        }
 
+        Description description = descripteur.decrire(image, questionNettoyee);
         return ResponseEntity.ok(new ReponseDescription(description.texte()));
     }
 

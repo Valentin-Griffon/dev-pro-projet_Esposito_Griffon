@@ -4,13 +4,17 @@ import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.ollama.OllamaChatModel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.Base64;
+import java.util.Objects;
 
 /**
  * Agent réel : appelle un modèle de vision via Ollama, à travers LangChain4J.
@@ -30,14 +34,22 @@ public class OllamaDescripteur implements DescripteurImage {
 
     private final ChatModel modele;
 
+    @Autowired
     public OllamaDescripteur(@Value("${descripteur.ollama.url}") String url,
                              @Value("${descripteur.ollama.modele}") String nomModele,
                              @Value("${descripteur.ollama.delai}") Duration delai) {
-        this.modele = OllamaChatModel.builder()
+        this(OllamaChatModel.builder()
                 .baseUrl(url)
                 .modelName(nomModele)
                 .timeout(delai)
-                .build();
+                .build());
+    }
+
+    /**
+     * Constructeur destiné aux tests : permet de fournir un modèle simulé.
+     */
+    OllamaDescripteur(ChatModel modele) {
+        this.modele = Objects.requireNonNull(modele, "Le modèle de chat est absent");
     }
 
     @Override
@@ -50,7 +62,8 @@ public class OllamaDescripteur implements DescripteurImage {
             UserMessage message = UserMessage.from(
                     TextContent.from(consigne),
                     ImageContent.from(base64, image.typeMime()));
-            texte = modele.chat(message).aiMessage().text();
+            ChatResponse reponse = modele.chat(ChatRequest.builder().messages(message).build());
+            texte = reponse.aiMessage().text();
         } catch (RuntimeException e) {
             throw new DescriptionImpossibleException("Le modèle n'a pas répondu", e);
         }
@@ -58,6 +71,6 @@ public class OllamaDescripteur implements DescripteurImage {
         if (texte == null || texte.isBlank()) {
             throw new DescriptionImpossibleException("Le modèle a renvoyé une réponse vide");
         }
-        return new Description(texte.strip());
+        return new Description(texte);
     }
 }
