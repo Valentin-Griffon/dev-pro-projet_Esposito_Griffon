@@ -2,6 +2,8 @@
 
 Application web qui décrit à voix haute une image déposée par l'utilisateur, pour les personnes qui ne peuvent pas la voir.
 
+La documentation (choix de conception, fonctionnement, diagrammes UML, conformité au sujet) est dans [docs/](docs/README.md).
+
 ## Lancer l'application
 
 Prérequis : Java 17 ou plus.
