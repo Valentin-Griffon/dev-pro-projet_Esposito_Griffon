@@ -10,6 +10,13 @@
 
 set -euo pipefail
 
+# Lancé avec sudo, le JDK, Ollama et Gradle seraient installés pour root
+# (dans /root et avec des fichiers appartenant à root dans le projet)
+if [ "$(id -u)" -eq 0 ]; then
+    echo "Ne lancez pas ce script avec sudo : il demande lui-même les droits si besoin." >&2
+    exit 1
+fi
+
 MODELE="${MODELE:-llava}"
 AVEC_OLLAMA=1
 AVEC_MODELE=1
@@ -39,7 +46,8 @@ version_java() {
 
 installer_java_17() {
     info "Installation de Java 17"
-    if apt_disponible && sudo apt-get install -y openjdk-17-jdk-headless; then
+    # Index apt périmé : les paquets peuvent renvoyer 404 sans cette mise à jour
+    if apt_disponible && sudo apt-get update && sudo apt-get install -y openjdk-17-jdk-headless; then
         return
     fi
 
