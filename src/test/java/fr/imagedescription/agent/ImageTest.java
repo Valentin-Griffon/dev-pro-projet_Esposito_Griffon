@@ -52,7 +52,9 @@ class ImageTest {
 
     @Test
     void refuseUnTypeAbsent() {
-        assertThatThrownBy(() -> new Image(PNG, null)).isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> new Image(PNG, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("pas pris en charge");
     }
 
     @Test

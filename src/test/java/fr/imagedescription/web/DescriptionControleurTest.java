@@ -7,7 +7,6 @@ import fr.imagedescription.agent.Image;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,7 +23,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -114,8 +112,25 @@ class DescriptionControleurTest {
     }
 
     @Test
-    void refuseUneRequeteSansFichier() throws Exception {
-        mvc.perform(post("/api/descriptions").contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isBadRequest());
+    void refuseUneRequeteSansFichierAvecUnMessageLisible() throws Exception {
+        mvc.perform(multipart("/api/descriptions").param("question", "Quelle couleur ?"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(containsString("Choisissez d'abord une image")));
+    }
+
+    @Test
+    void refuseUnFichierSansTypeMime() throws Exception {
+        mvc.perform(requete(image(null, PNG)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(containsString("pas pris en charge")));
+    }
+
+    @Test
+    void repondParUnMessageLisibleSiUneErreurInattendueSurvient() throws Exception {
+        when(descripteur.decrire(any(Image.class), isNull())).thenThrow(new IllegalStateException("bug"));
+
+        mvc.perform(requete(image("image/png", PNG)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value(containsString("erreur inattendue")));
     }
 }

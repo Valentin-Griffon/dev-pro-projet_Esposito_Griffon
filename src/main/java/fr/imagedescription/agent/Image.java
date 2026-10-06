@@ -14,11 +14,10 @@ public record Image(byte[] octets, String typeMime) {
 
     public Image {
         Objects.requireNonNull(octets, "Les octets de l'image sont absents");
-        Objects.requireNonNull(typeMime, "Le type de l'image est absent");
         if (octets.length == 0) {
             throw new IllegalArgumentException("Le fichier choisi est vide. Choisissez une autre image.");
         }
-        if (!TYPES_ACCEPTES.contains(typeMime)) {
+        if (typeMime == null || !TYPES_ACCEPTES.contains(typeMime)) {
             throw new IllegalArgumentException(
                     "Ce type de fichier n'est pas pris en charge. Choisissez une image JPEG, PNG, WebP ou GIF.");
         }
