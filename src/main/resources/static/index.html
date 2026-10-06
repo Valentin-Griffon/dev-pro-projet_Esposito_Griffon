@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Décrire une image</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 0 auto; padding: 1rem; line-height: 1.5; }
+        label { display: block; font-weight: 600; margin-top: 1rem; }
+        input, button { font: inherit; margin-top: .25rem; }
+        button { padding: .5rem 1rem; margin-top: 1rem; margin-right: .5rem; }
+        button:focus, input:focus { outline: 3px solid #1a5fb4; outline-offset: 2px; }
+        #resultat { margin-top: 1.5rem; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>Décrire une image</h1>
+
+    <form id="formulaire">
+        <label for="image">Image à décrire</label>
+        <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp,image/gif" required>
+
+        <label for="question">Question sur l'image (facultatif)</label>
+        <input type="text" id="question" name="question">
+
+        <button type="submit" id="analyser">Analyser l'image</button>
+        <button type="button" id="relire" disabled>Relire la description</button>
+        <button type="button" id="arreter" disabled>Arrêter la lecture</button>
+    </form>
+
+    <!-- Les messages d'état et la description sont annoncés par le lecteur d'écran -->
+    <p id="statut" role="status" aria-live="polite"></p>
+    <div id="resultat" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
