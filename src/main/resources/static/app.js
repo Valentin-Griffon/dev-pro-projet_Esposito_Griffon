@@ -1,79 +1,98 @@
 const formulaire = document.getElementById('formulaire');
 const statut = document.getElementById('statut');
 const resultat = document.getElementById('resultat');
+const boutonAnalyser = document.getElementById('analyser');
 const boutonRelire = document.getElementById('relire');
 const boutonArreter = document.getElementById('arreter');
-const boutonAnalyser = document.getElementById('analyser');
+
+const MESSAGE_INATTENDU = 'Une erreur inattendue s\'est produite. Réessayez dans un instant.';
 
 let dernierTexte = null;
+let analyseEnCours = false;
 
-function dire(texte) {
-    if (!('speechSynthesis' in window)) {
+/** Lit le texte à voix haute. Sans synthèse vocale, la page reste utilisable par son texte. */
+function lire(texte) {
+    if (!('speechSynthesis' in window) || !texte) {
         return;
     }
     speechSynthesis.cancel();
     const lecture = new SpeechSynthesisUtterance(texte);
     lecture.lang = 'fr-FR';
-    const voixFrancaise = speechSynthesis.getVoices().find(v => v.lang.startsWith('fr'));
+    const voixFrancaise = speechSynthesis.getVoices().find(voix => voix.lang.startsWith('fr'));
     if (voixFrancaise) {
         lecture.voice = voixFrancaise;
     }
-    boutonArreter.disabled = false;
-    lecture.onend = () => { boutonArreter.disabled = true; };
     speechSynthesis.speak(lecture);
 }
 
-function afficher(texte, message) {
+function afficherDescription(texte) {
+    dernierTexte = texte;
+    boutonRelire.disabled = false;
     resultat.textContent = texte;
+    statut.textContent = 'Description prête.';
+    lire(texte);
+}
+
+function afficherErreur(message) {
+    dernierTexte = null;
+    boutonRelire.disabled = true;
+    resultat.textContent = '';
     statut.textContent = message;
-    dire(message || texte);
+    lire(message);
 }
 
 formulaire.addEventListener('submit', async (evenement) => {
     evenement.preventDefault();
+    if (analyseEnCours) {
+        return;
+    }
+
     const fichier = document.getElementById('image').files[0];
     if (!fichier) {
-        afficher('', 'Choisissez d\'abord une image.');
+        afficherErreur('Choisissez d\'abord une image.');
         return;
     }
 
     const donnees = new FormData();
     donnees.append('image', fichier);
-    const question = document.getElementById('question').value;
-    if (question.trim()) {
+    const question = document.getElementById('question').value.trim();
+    if (question) {
         donnees.append('question', question);
     }
 
-    boutonAnalyser.disabled = true;
+    analyseEnCours = true;
     resultat.textContent = '';
-    statut.textContent = 'Analyse en cours, cela peut prendre quelques dizaines de secondes…';
+    const attente = 'Analyse en cours, cela peut prendre quelques dizaines de secondes.';
+    statut.textContent = attente + '…';
+    lire(attente);
 
     try {
         const reponse = await fetch('/api/descriptions', { method: 'POST', body: donnees });
-        const corps = await reponse.json();
-        if (reponse.ok) {
-            dernierTexte = corps.description;
-            boutonRelire.disabled = false;
-            afficher(corps.description, 'Description prête.');
+        let corps = null;
+        try {
+            corps = await reponse.json();
+        } catch (erreurLecture) {
+            corps = null;
+        }
+
+        if (reponse.ok && corps && corps.description) {
+            afficherDescription(corps.description);
         } else {
-            dernierTexte = null;
-            boutonRelire.disabled = true;
-            afficher('', corps.message);
+            afficherErreur((corps && corps.message) || MESSAGE_INATTENDU);
         }
     } catch (erreur) {
-        afficher('', 'Impossible de joindre le serveur. Vérifiez que l\'application est lancée.');
+        afficherErreur('Impossible de joindre le serveur. Vérifiez que l\'application est lancée.');
     } finally {
-        boutonAnalyser.disabled = false;
+        analyseEnCours = false;
     }
 });
 
 boutonRelire.addEventListener('click', () => {
-    if (dernierTexte) {
-        dire(dernierTexte);
-    }
+    lire(dernierTexte);
 });
 
 boutonArreter.addEventListener('click', () => {
-    speechSynthesis.cancel();
-    boutonArreter.disabled = true;
+    if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+    }
 });
