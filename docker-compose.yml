@@ -30,6 +30,8 @@ services:
       DESCRIPTEUR_PORT: "8080"
       DESCRIPTEUR_OLLAMA_HOTE: ollama
       DESCRIPTEUR_OLLAMA_PORT: "11434"
+      # Modèle de vision utilisé (paramétrable), à télécharger dans le conteneur ollama
+      DESCRIPTEUR_OLLAMA_MODELE: ${DESCRIPTEUR_OLLAMA_MODELE:-llava}
     restart: unless-stopped
 
 volumes:
