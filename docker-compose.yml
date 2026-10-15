@@ -1,17 +1,36 @@
 # Stack Docker de l'application.
-# Ollama n'est pas encore intégré à cette stack : il sera ajouté plus tard, dans son propre conteneur.
+# Ollama tourne dans son propre conteneur, séparé de l'image de l'application.
 #
 # Lancement : docker compose up --build
 # Application : http://localhost:${DESCRIPTEUR_PORT:-8080}
+# Au premier démarrage, le modèle llava doit être téléchargé une fois :
+#   docker compose exec ollama ollama pull llava
 
 services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_donnees:/root/.ollama
+    restart: unless-stopped
+    devices:
+      - nvidia.com/gpu=all
+
   application:
     build: .
+    depends_on:
+      - ollama
     ports:
       # Port de l'hôte (paramétrable) vers le port 8080 du conteneur
       - "${DESCRIPTEUR_PORT:-8080}:8080"
     environment:
-      # Sans Ollama, on utilise la fausse implémentation par défaut
-      SPRING_PROFILES_ACTIVE: ${PROFIL:-faux}
+      # Avec Ollama disponible, on utilise l'implémentation réelle (tout profil différent de "faux")
+      SPRING_PROFILES_ACTIVE: ${PROFIL:-reel}
       DESCRIPTEUR_PORT: "8080"
+      DESCRIPTEUR_OLLAMA_HOTE: ollama
+      DESCRIPTEUR_OLLAMA_PORT: "11434"
     restart: unless-stopped
+
+volumes:
+  ollama_donnees:
