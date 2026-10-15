@@ -82,8 +82,10 @@ Les réglages se trouvent dans `src/main/resources/application.properties`. Chac
 | --- | --- | --- |
 | Développement, sans modèle | `./gradlew bootRun --args='--spring.profiles.active=faux'` | non |
 | Développement, avec modèle | `./gradlew bootRun` (Ollama lancé, modèle `llava` téléchargé) | oui |
-| Docker | `docker compose up --build` (profil `faux` par défaut) | non |
-| Installation Docker sur une machine vierge | `./install.sh` | non |
+| Docker | `docker compose up --build` (application et Ollama, profil `reel` par défaut, modèle à télécharger une fois) | oui, dans son conteneur |
+| Docker, sans modèle | `PROFIL=faux docker compose up --build` | non |
+| Docker sous WSL2 avec GPU NVIDIA | `bash demarrer-wsl.sh` (configure le GPU, lance la stack, télécharge le modèle) | oui, dans son conteneur |
+| Installation Docker sur une machine vierge | `./install.sh` | oui, dans son conteneur |
 
 ## 7. Démarrage et choix de l'agent
 
@@ -113,6 +115,7 @@ Les 36 tests vérifient la validation des images, la fausse et la vraie impléme
 ProjetJavaPro/
 ├── Dockerfile, docker-compose.yml, .dockerignore   conteneurisation
 ├── install.sh                                       installation Docker
+├── demarrer-wsl.sh                                  lancement sous WSL2 avec GPU NVIDIA
 ├── build.gradle, settings.gradle, gradlew           construction
 ├── CLAUDE.md                                        règles du projet (Git, versions, conteneurs)
 ├── docs/                                            cette documentation

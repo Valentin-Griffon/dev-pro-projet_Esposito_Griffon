@@ -120,13 +120,13 @@ Le sujet demande un délai réglable et un message d'attente : le délai est dan
 
 ## 11. Configuration par variables d'environnement
 
-**Choix** : chaque réglage utile a une valeur par défaut et peut être remplacé par une variable d'environnement (`DESCRIPTEUR_PORT`, `DESCRIPTEUR_OLLAMA_HOTE`, `DESCRIPTEUR_OLLAMA_PORT`).
+**Choix** : chaque réglage utile a une valeur par défaut et peut être remplacé par une variable d'environnement (`DESCRIPTEUR_PORT`, `DESCRIPTEUR_OLLAMA_HOTE`, `DESCRIPTEUR_OLLAMA_PORT`, `DESCRIPTEUR_OLLAMA_MODELE`).
 
 **Pourquoi** : l'application n'a pas forcément le même emplacement d'un poste à l'autre. Elle peut tourner en conteneur, et Ollama peut être ailleurs, sans recompiler.
 
 ## 12. Docker
 
-**Choix** : une image de l'application construite en deux étapes (compilation avec le JDK, exécution avec le JRE), et un `docker-compose.yml`. Ollama n'est pas encore dans la stack : il sera ajouté dans son propre conteneur.
+**Choix** : une image de l'application construite en deux étapes (compilation avec le JDK, exécution avec le JRE), et un `docker-compose.yml` qui lance deux conteneurs : l'application et Ollama. Ollama a son propre conteneur (image `ollama/ollama`, accès au GPU NVIDIA, modèles gardés dans un volume), séparé de l'image de l'application. L'application le joint par le nom du service (`DESCRIPTEUR_OLLAMA_HOTE=ollama`).
 
 **Pourquoi** : le sujet demande que l'application se lance sur un poste. Docker rend l'environnement reproductible, sans installer Java à la main.
 
@@ -143,7 +143,7 @@ Le sujet demande un délai réglable et un message d'attente : le délai est dan
 | `DescriptionControleurTest` | codes HTTP, messages, transmission de la question |
 | `DescriptionImageApplicationTests` | démarrage du contexte avec le profil `faux` |
 
-**Limite** : aucun test ne lance un vrai modèle Ollama. Le modèle est simulé. Un test d'intégration viendra quand Ollama sera intégré à la stack.
+**Limite** : aucun test ne lance un vrai modèle Ollama. Le modèle est simulé. Ollama est maintenant dans la stack Docker, mais aucun test d'intégration automatique ne l'appelle encore.
 
 ## 14. Versionnage et Git
 

@@ -111,7 +111,7 @@ Le sujet demande que chacun écrive du Java, avec une répartition (A : agent La
 
 1. Valider la lecture vocale et la navigation au clavier dans un navigateur (Chrome ou Firefox).
 2. Tester un lecteur d'écran (NVDA, VoiceOver ou Orca).
-3. Installer le modèle `llava` et tester la consigne sur des images dont on connaît le contenu.
+3. Tester la consigne avec le vrai modèle (`llava` ou `qwen2.5vl`, déjà téléchargés dans le conteneur Ollama) sur des images dont on connaît le contenu.
 4. Compléter le README (présentation, tests, état).
 5. Vérifier l'auteur des commits avec le binôme.
 6. Préparer les réponses orales (voir [01 - Choix](01-choix-conception.md)).

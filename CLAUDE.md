@@ -18,8 +18,8 @@ Ces règles s'appliquent à tout travail fait dans ce dépôt, par Claude comme 
 ## Conteneurs
 
 - Le projet est déployé dans Docker. L'application a son propre `Dockerfile` et tourne dans son conteneur.
-- Ollama ne fait **pas encore partie de la stack Docker** : son intégration est reportée. Quand elle sera faite, Ollama tournera dans un **conteneur séparé**, sans être intégré à l'image de l'application.
-- L'application ne doit pas coder en dur `localhost` pour Ollama : l'adresse se règle par variable d'environnement (`DESCRIPTEUR_OLLAMA_URL`).
+- Ollama fait partie de la stack Docker, dans un **conteneur séparé** (service `ollama` de `docker-compose.yml`), sans être intégré à l'image de l'application. Ses modèles sont gardés dans le volume `ollama_donnees`.
+- L'application ne doit pas coder en dur `localhost` pour Ollama : l'adresse, le port et le modèle se règlent par variables d'environnement (`DESCRIPTEUR_OLLAMA_HOTE`, `DESCRIPTEUR_OLLAMA_PORT`, `DESCRIPTEUR_OLLAMA_MODELE`).
 
 ## Versionnage
 

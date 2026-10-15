@@ -208,8 +208,8 @@ flowchart LR
         AG["Agent DescripteurImage"]
     end
 
-    subgraph Modele["Modèle de vision (hors stack pour l'instant)"]
-        OLL["Ollama<br/>port 11434<br/>modèle llava"]
+    subgraph Modele["Conteneur Ollama (Docker, GPU NVIDIA)"]
+        OLL["Ollama<br/>port 11434<br/>modèle DESCRIPTEUR_OLLAMA_MODELE (llava par défaut)"]
     end
 
     NAV -- "POST multipart : image, question" --> APP
