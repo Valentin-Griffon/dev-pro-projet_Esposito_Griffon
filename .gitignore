@@ -2,6 +2,7 @@
 build/
 out/
 bin/
+report/
 *.class
 .idea/
 .vscode/
