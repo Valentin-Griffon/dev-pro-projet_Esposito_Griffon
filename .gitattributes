@@ -1,0 +1,7 @@
+# Scripts exécutés sous Linux (conteneur Docker, WSL) : toujours en fins de ligne LF,
+# même sur un poste Windows avec core.autocrlf=true, sinon « ./gradlew: not found ».
+gradlew text eol=lf
+*.sh    text eol=lf
+
+# Scripts Windows : fins de ligne CRLF
+*.bat   text eol=crlf

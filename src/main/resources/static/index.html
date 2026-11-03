@@ -26,15 +26,26 @@
                 <button type="submit" id="analyser"
                         data-voix="Bouton Analyser l'image. Appuyez sur Entrée pour envoyer l'image et entendre sa description.">Analyser l'image</button>
                 <button type="button" id="relire" disabled
-                        data-voix="Bouton Relire la description. Appuyez sur Entrée pour réécouter la description.">Relire la description</button>
+                        data-voix="Bouton Relire la dernière réponse. Appuyez sur Entrée pour la réécouter.">Relire la dernière réponse</button>
                 <button type="button" id="arreter"
                         data-voix="Bouton Arrêter la lecture. Appuyez sur Entrée pour couper la voix.">Arrêter la lecture</button>
             </div>
         </form>
 
-        <!-- Les messages d'état et la description sont annoncés par le lecteur d'écran -->
+        <!-- Les messages d'état et la dernière réponse sont annoncés par le lecteur d'écran -->
         <p id="statut" role="status" aria-live="polite"></p>
         <div id="resultat" aria-live="polite"></div>
+
+        <h2>Conversation sur cette image</h2>
+        <div id="transcript"></div>
+
+        <form id="formulaireSuite">
+            <label for="questionSuite">Poser une autre question sur la même image</label>
+            <input type="text" id="questionSuite" name="questionSuite" disabled
+                   data-voix="Poser une autre question sur la même image. Écrivez votre question, puis validez pour continuer la conversation.">
+            <button type="submit" id="envoyerSuite" disabled
+                    data-voix="Bouton Envoyer la question. Appuyez sur Entrée pour poser votre question de suivi sur l'image.">Envoyer la question</button>
+        </form>
     </main>
 
     <script src="app.js"></script>

@@ -1,5 +1,7 @@
 package fr.imagedescription.agent;
 
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.UserMessage;
@@ -8,7 +10,9 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.ollama.OllamaChatModel;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,15 +51,24 @@ public class OllamaDescripteur implements DescripteurImage {
   }
 
   @Override
-  public Description decrire(Image image, String question) throws DescriptionImpossibleException {
-    String consigne = question == null ? CONSIGNE_GENERALE : CONSIGNE_QUESTION + question;
+  public Description decrire(Image image, String question, List<Echange> historique)
+      throws DescriptionImpossibleException {
+    Objects.requireNonNull(historique, "L'historique est absent");
     String base64 = Base64.getEncoder().encodeToString(image.octets());
+
+    // L'image n'est jointe qu'au premier message de la conversation : les tours suivants la
+    // retrouvent dans le contexte envoyé au modèle, sans la ré-encoder à chaque question.
+    List<ChatMessage> messages = new ArrayList<>();
+    for (Echange echange : historique) {
+      messages.add(
+          messageUtilisateur(echange.question(), base64, image.typeMime(), messages.isEmpty()));
+      messages.add(AiMessage.from(echange.reponse()));
+    }
+    messages.add(messageUtilisateur(question, base64, image.typeMime(), messages.isEmpty()));
 
     String texte;
     try {
-      UserMessage message =
-          UserMessage.from(TextContent.from(consigne), ImageContent.from(base64, image.typeMime()));
-      ChatResponse reponse = modele.chat(ChatRequest.builder().messages(message).build());
+      ChatResponse reponse = modele.chat(ChatRequest.builder().messages(messages).build());
       texte = reponse.aiMessage().text();
     } catch (RuntimeException e) {
       throw new DescriptionImpossibleException("Le modèle n'a pas répondu", e);
@@ -65,5 +78,13 @@ public class OllamaDescripteur implements DescripteurImage {
       throw new DescriptionImpossibleException("Le modèle a renvoyé une réponse vide");
     }
     return new Description(texte);
+  }
+
+  private static UserMessage messageUtilisateur(
+      String question, String imageBase64, String typeMime, boolean premierMessage) {
+    String consigne = question == null ? CONSIGNE_GENERALE : CONSIGNE_QUESTION + question;
+    return premierMessage
+        ? UserMessage.from(TextContent.from(consigne), ImageContent.from(imageBase64, typeMime))
+        : UserMessage.from(consigne);
   }
 }

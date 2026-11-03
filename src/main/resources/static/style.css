@@ -135,6 +135,19 @@ input:focus {
     border-radius: .25rem;
 }
 
+/* Conversation : chaque échange passé est encadré comme la description, pour rester lisible */
+#transcript p {
+    margin-top: 1rem;
+    padding: .75rem 1rem;
+    white-space: pre-wrap;
+    border: 3px solid var(--bordure);
+    border-radius: .25rem;
+}
+
+#formulaireSuite {
+    margin-top: 1.5rem;
+}
+
 /* Petits écrans et zoom important : tout reste en une colonne, les boutons occupent la largeur */
 @media (max-width: 30rem) {
     button {
