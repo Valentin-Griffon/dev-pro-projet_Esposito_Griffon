@@ -101,7 +101,15 @@ Description decrire(Image image, String question) throws DescriptionImpossibleEx
 - chaque champ a un `<label>` ;
 - `lang="fr"` sur la page ;
 - zones `aria-live` pour le statut et la description ;
-- contour de focus visible.
+- contour de focus visible (5 px) ;
+- repères de page (`<header>`, `<main>`) et titre `h1` ;
+- chaque contrôle annonce à voix haute son rôle quand il reçoit le focus (attribut `data-voix`, lu par `app.js`), pour qu'une personne qui ne voit pas l'écran sache où elle se trouve et ce que fait Entrée ;
+- touche Échap pour couper la voix depuis n'importe où ;
+- le choix d'un fichier est annoncé (« Image choisie : nom.jpg »).
+
+**Style** : `style.css`, séparé de la page. Fort contraste (thème clair, thème sombre selon le système, `prefers-contrast`), texte agrandi (125 %), boutons larges et séparés, une seule colonne, bouton désactivé reconnaissable sans la couleur (bordure en pointillé), pas d'animation. Pour les personnes malvoyantes.
+
+**Limite connue** : le muet de l'onglet du navigateur ne coupe pas la voix, car la Web Speech API ne passe pas par l'audio de l'onglet et la page ne peut pas le détecter. L'arrêt se fait avec Échap ou le bouton.
 
 **Lecture** : déclenchée par l'envoi du formulaire, donc par une action de l'utilisateur, car les navigateurs bloquent la voix sans interaction. Un bouton « Relire » et un bouton « Arrêter la lecture » sont toujours disponibles. La voix `fr-FR` est choisie si elle existe.
 
