@@ -25,11 +25,13 @@ services:
       # Port de l'hôte (paramétrable) vers le port 8080 du conteneur
       - "${DESCRIPTEUR_PORT:-8080}:8080"
     environment:
+      # Ollama : par défaut le conteneur ci-dessus ; pour un Ollama sur une autre machine,
+      # définir DESCRIPTEUR_OLLAMA_HOTE (et DESCRIPTEUR_OLLAMA_PORT) et lancer avec --no-deps
       # Avec Ollama disponible, on utilise l'implémentation réelle (tout profil différent de "faux")
       SPRING_PROFILES_ACTIVE: ${PROFIL:-reel}
       DESCRIPTEUR_PORT: "8080"
-      DESCRIPTEUR_OLLAMA_HOTE: ollama
-      DESCRIPTEUR_OLLAMA_PORT: "11434"
+      DESCRIPTEUR_OLLAMA_HOTE: ${DESCRIPTEUR_OLLAMA_HOTE:-ollama}
+      DESCRIPTEUR_OLLAMA_PORT: ${DESCRIPTEUR_OLLAMA_PORT:-11434}
       # Modèle de vision utilisé (paramétrable), à télécharger dans le conteneur ollama
       DESCRIPTEUR_OLLAMA_MODELE: ${DESCRIPTEUR_OLLAMA_MODELE:-llava}
     restart: unless-stopped

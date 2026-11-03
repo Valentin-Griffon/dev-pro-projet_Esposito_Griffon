@@ -157,8 +157,38 @@ boutonRelire.addEventListener('click', () => {
     lire(dernierTexte);
 });
 
-boutonArreter.addEventListener('click', () => {
+function arreterLecture() {
     if ('speechSynthesis' in window) {
         speechSynthesis.cancel();
+    }
+}
+
+boutonArreter.addEventListener('click', arreterLecture);
+
+// Échap coupe la voix depuis n'importe où dans la page, sans chercher le bouton
+document.addEventListener('keydown', (evenement) => {
+    if (evenement.key === 'Escape') {
+        arreterLecture();
+    }
+});
+
+// Confirme le fichier choisi : une personne qui ne voit pas l'écran ne peut pas le vérifier autrement
+document.getElementById('image').addEventListener('change', (evenement) => {
+    const fichier = evenement.target.files[0];
+    if (fichier) {
+        const annonce = 'Image choisie : ' + fichier.name + '.';
+        statut.textContent = annonce;
+        lire(annonce);
+        resultat.textContent = '';
+        dernierTexte = null;
+        boutonRelire.disabled = true;
+    }
+});
+
+// Dit à voix haute où l'on se trouve : chaque contrôle annonce son rôle quand il reçoit le focus
+document.addEventListener('focusin', (evenement) => {
+    const phrase = evenement.target.dataset && evenement.target.dataset.voix;
+    if (phrase) {
+        lire(phrase);
     }
 });
