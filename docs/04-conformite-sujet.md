@@ -99,19 +99,23 @@ Les points marqués 🟡 ne peuvent pas être vérifiés depuis le terminal : il
 | Spring Boot et LangChain4J | ✅ | `build.gradle` (Spring Boot 3.5.16, LangChain4J 1.21.0) |
 | se lance avec `./gradlew bootRun` | ✅ | exécuté avec succès pendant le développement |
 | dépôt GitHub avec historique | ✅ | `origin/main` |
-| commits au nom de chaque auteur | ❌ | **tous les commits ont un seul auteur** (`Valentin-Griffon`). Le sujet demande de faire ses commits à son nom : à vérifier avec le binôme. |
-| README complet | 🟡 | lancement, Docker, configuration, fausse implémentation et modèle sont décrits. Restent à écrire : présentation de l'application, tests, et l'état du README (« sera complété avant le rendu »). |
+| commits au nom de chaque auteur | ✅ | **vérifié le 20/10** : l'historique contient des commits sous les deux identités (`Valentin-Griffon`/`Valentin Griffon <griffonv@3il.fr>` et `Esposito Mathis`/`Mathis Esposito <mathis311005@gmail.com>`). |
+| README complet | ✅ | les quatre points exigés par le sujet y sont : ce que fait l'application, comment l'installer/la lancer, quel modèle elle attend, comment passer à la fausse implémentation. La ligne « sera complété avant le rendu » peut être retirée une fois la relecture finale faite. |
 | les deux implémentations rendues | ✅ | voir section 4 |
 
 ## 10. Répartition du binôme
 
-Le sujet demande que chacun écrive du Java, avec une répartition (A : agent LangChain4J, consigne, fausse implémentation ; B : web, validation, traduction des erreurs). **L'historique Git actuel n'indique pas cette répartition** : tous les commits ont le même auteur. Il faut donc la confirmer avec le binôme, et faire en sorte que chacun puisse présenter sa partie sans l'assistant (N27).
+Le sujet demande que chacun écrive du Java, avec une répartition (A : agent LangChain4J, consigne, fausse implémentation, configuration Ollama ; B : web, validation, traduction des erreurs, page et synthèse vocale). **Vérifié le 20/10** sur l'historique Git :
+
+- `Mathis Esposito` (espositm@3il.fr / mathis311005@gmail.com) a écrit : la validation des images et des réponses de l'agent (`Image`), les tests unitaires et du contrôleur, le paramétrage Ollama (port, adresse, modèle) et Docker. Cela recoupe surtout la partie **A** (agent/Ollama), avec un peu de B (validation côté contrôleur).
+- `Valentin-Griffon` (griffonv@3il.fr) a écrit : la base du projet (y compris l'agent et la fausse implémentation initiaux), la conteneurisation Docker, les corrections d'accessibilité (focus, lecture vocale) et la traduction des erreurs en messages lisibles. Cela recoupe surtout la partie **B** (web/accessibilité), avec la mise en place initiale de l'agent.
+
+La répartition n'est donc pas une coupure stricte A/B mais les deux ont écrit du Java sur les deux parties. À l'oral, chacun doit pouvoir présenter ses propres commits sans l'assistant (N27) ; c'est à confirmer entre vous avant le 4 novembre.
 
 ## 11. Ce qui reste à faire avant le 4 novembre
 
 1. Valider la lecture vocale et la navigation au clavier dans un navigateur (Chrome ou Firefox).
 2. Tester un lecteur d'écran (NVDA, VoiceOver ou Orca).
 3. Tester la consigne avec le vrai modèle (`llava` ou `qwen2.5vl`, déjà téléchargés dans le conteneur Ollama) sur des images dont on connaît le contenu.
-4. Compléter le README (présentation, tests, état).
-5. Vérifier l'auteur des commits avec le binôme.
-6. Préparer les réponses orales (voir [01 - Choix](01-choix-conception.md)).
+4. Retirer la ligne « Ce README sera complété avant le rendu » une fois la relecture finale faite (le contenu exigé par le sujet y est déjà).
+5. Convenir ensemble de qui présente quelle partie à l'oral (voir section 10), et préparer les réponses sans l'assistant (voir [01 - Choix](01-choix-conception.md)).

@@ -11,6 +11,8 @@
         button { padding: .5rem 1rem; margin-top: 1rem; margin-right: .5rem; }
         button:focus, input:focus { outline: 3px solid #1a5fb4; outline-offset: 2px; }
         #resultat { margin-top: 1.5rem; white-space: pre-wrap; }
+        #transcript p { white-space: pre-wrap; border-top: 1px solid #ccc; padding-top: .5rem; }
+        #formulaireSuite { margin-top: 1rem; }
     </style>
 </head>
 <body>
@@ -24,13 +26,22 @@
         <input type="text" id="question" name="question">
 
         <button type="submit" id="analyser">Analyser l'image</button>
-        <button type="button" id="relire" disabled>Relire la description</button>
+        <button type="button" id="relire" disabled>Relire la dernière réponse</button>
         <button type="button" id="arreter">Arrêter la lecture</button>
     </form>
 
-    <!-- Les messages d'état et la description sont annoncés par le lecteur d'écran -->
+    <!-- Les messages d'état et la dernière réponse sont annoncés par le lecteur d'écran -->
     <p id="statut" role="status" aria-live="polite"></p>
     <div id="resultat" aria-live="polite"></div>
+
+    <h2>Conversation sur cette image</h2>
+    <div id="transcript"></div>
+
+    <form id="formulaireSuite">
+        <label for="questionSuite">Poser une autre question sur la même image</label>
+        <input type="text" id="questionSuite" name="questionSuite" disabled>
+        <button type="submit" id="envoyerSuite" disabled>Envoyer la question</button>
+    </form>
 
     <script src="app.js"></script>
 </body>

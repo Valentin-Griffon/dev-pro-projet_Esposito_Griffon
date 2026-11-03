@@ -15,8 +15,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import fr.imagedescription.agent.DescripteurImage;
 import fr.imagedescription.agent.Description;
 import fr.imagedescription.agent.DescriptionImpossibleException;
+import fr.imagedescription.agent.Echange;
 import fr.imagedescription.agent.Image;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -44,7 +46,8 @@ class DescriptionControleurTest {
 
   @Test
   void renvoieLaDescriptionDeLImage() throws Exception {
-    when(descripteur.decrire(any(Image.class), isNull())).thenReturn(new Description("Un chat."));
+    when(descripteur.decrire(any(Image.class), isNull(), eq(List.of())))
+        .thenReturn(new Description("Un chat."));
 
     mvc.perform(requete(image("image/png", PNG)))
         .andExpect(status().isOk())
@@ -54,16 +57,80 @@ class DescriptionControleurTest {
 
   @Test
   void transmetLaQuestionNettoyeeOuNullSiElleEstVide() throws Exception {
-    when(descripteur.decrire(any(Image.class), anyString())).thenReturn(new Description("Rouge."));
+    when(descripteur.decrire(any(Image.class), anyString(), eq(List.of())))
+        .thenReturn(new Description("Rouge."));
 
     mvc.perform(requete(image("image/png", PNG)).param("question", "  De quelle couleur ?  "))
         .andExpect(status().isOk());
-    verify(descripteur).decrire(any(Image.class), eq("De quelle couleur ?"));
+    verify(descripteur).decrire(any(Image.class), eq("De quelle couleur ?"), eq(List.of()));
 
-    when(descripteur.decrire(any(Image.class), isNull())).thenReturn(new Description("Un chat."));
+    when(descripteur.decrire(any(Image.class), isNull(), eq(List.of())))
+        .thenReturn(new Description("Un chat."));
     mvc.perform(requete(image("image/png", PNG)).param("question", "   "))
         .andExpect(status().isOk());
-    verify(descripteur).decrire(any(Image.class), isNull());
+    verify(descripteur).decrire(any(Image.class), isNull(), eq(List.of()));
+  }
+
+  @Test
+  void transmetLHistoriqueDeLaConversation() throws Exception {
+    when(descripteur.decrire(any(Image.class), eq("Et derrière ?"), any()))
+        .thenReturn(new Description("Un mur blanc."));
+
+    String historiqueJson = "[{\"question\":null,\"reponse\":\"Un chat sur un canapé.\"}]";
+    mvc.perform(
+            requete(image("image/png", PNG))
+                .param("question", "Et derrière ?")
+                .param("historique", historiqueJson))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.description").value("Un mur blanc."));
+    verify(descripteur)
+        .decrire(
+            any(Image.class),
+            eq("Et derrière ?"),
+            eq(List.of(new Echange(null, "Un chat sur un canapé."))));
+  }
+
+  @Test
+  void refuseUnHistoriqueIllisible() throws Exception {
+    mvc.perform(
+            requete(image("image/png", PNG))
+                .param("question", "Et derrière ?")
+                .param("historique", "pas du json"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value(containsString("invalide")));
+    verify(descripteur, never()).decrire(any(), any(), any());
+  }
+
+  @Test
+  void refuseUnEchangeAvecUneReponseVide() throws Exception {
+    mvc.perform(
+            requete(image("image/png", PNG))
+                .param("question", "Et derrière ?")
+                .param("historique", "[{\"question\":\"Une question\",\"reponse\":\"  \"}]"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value(containsString("invalide")));
+    verify(descripteur, never()).decrire(any(), any(), any());
+  }
+
+  @Test
+  void refuseUnHistoriqueTropLong() throws Exception {
+    String echange = "{\"question\":null,\"reponse\":\"Une réponse.\"}";
+    StringBuilder tableau = new StringBuilder("[");
+    for (int i = 0; i < DescriptionControleur.HISTORIQUE_MAX + 1; i++) {
+      if (i > 0) {
+        tableau.append(',');
+      }
+      tableau.append(echange);
+    }
+    tableau.append(']');
+
+    mvc.perform(
+            requete(image("image/png", PNG))
+                .param("question", "Et derrière ?")
+                .param("historique", tableau.toString()))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value(containsString("trop longue")));
+    verify(descripteur, never()).decrire(any(), any(), any());
   }
 
   @Test
@@ -71,7 +138,7 @@ class DescriptionControleurTest {
     mvc.perform(requete(image("image/png", new byte[0])))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value(containsString("vide")));
-    verify(descripteur, never()).decrire(any(), any());
+    verify(descripteur, never()).decrire(any(), any(), any());
   }
 
   @Test
@@ -85,7 +152,7 @@ class DescriptionControleurTest {
   void refuseUnFichierDontLEnTeteNeCorrespondPasAuType() throws Exception {
     mvc.perform(requete(image("image/jpeg", "texte brut".getBytes(StandardCharsets.UTF_8))))
         .andExpect(status().isBadRequest());
-    verify(descripteur, never()).decrire(any(), any());
+    verify(descripteur, never()).decrire(any(), any(), any());
   }
 
   @Test
@@ -95,12 +162,12 @@ class DescriptionControleurTest {
     mvc.perform(requete(image("image/png", PNG)).param("question", question))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value(containsString("trop longue")));
-    verify(descripteur, never()).decrire(any(), any());
+    verify(descripteur, never()).decrire(any(), any(), any());
   }
 
   @Test
   void repondSansErreurSiLaDescriptionEstImpossible() throws Exception {
-    when(descripteur.decrire(any(Image.class), isNull()))
+    when(descripteur.decrire(any(Image.class), isNull(), eq(List.of())))
         .thenThrow(new DescriptionImpossibleException("modèle arrêté"));
 
     mvc.perform(requete(image("image/png", PNG)))
@@ -124,7 +191,7 @@ class DescriptionControleurTest {
 
   @Test
   void repondParUnMessageLisibleSiUneErreurInattendueSurvient() throws Exception {
-    when(descripteur.decrire(any(Image.class), isNull()))
+    when(descripteur.decrire(any(Image.class), isNull(), eq(List.of())))
         .thenThrow(new IllegalStateException("bug"));
 
     mvc.perform(requete(image("image/png", PNG)))

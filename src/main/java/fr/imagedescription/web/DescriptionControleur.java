@@ -1,10 +1,16 @@
 package fr.imagedescription.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.imagedescription.agent.DescripteurImage;
 import fr.imagedescription.agent.Description;
 import fr.imagedescription.agent.DescriptionImpossibleException;
+import fr.imagedescription.agent.Echange;
 import fr.imagedescription.agent.Image;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -31,8 +37,10 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 public class DescriptionControleur {
 
   static final int QUESTION_MAX = 500;
+  static final int HISTORIQUE_MAX = 20;
 
   private static final Logger JOURNAL = LoggerFactory.getLogger(DescriptionControleur.class);
+  private static final ObjectMapper JSON = new ObjectMapper();
 
   private final DescripteurImage descripteur;
 
@@ -43,7 +51,8 @@ public class DescriptionControleur {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ReponseDescription> decrire(
       @RequestParam("image") MultipartFile fichier,
-      @RequestParam(value = "question", required = false) String question)
+      @RequestParam(value = "question", required = false) String question,
+      @RequestParam(value = "historique", required = false) String historiqueJson)
       throws IOException, DescriptionImpossibleException {
 
     Image image;
@@ -60,9 +69,52 @@ public class DescriptionControleur {
           "La question est trop longue. Limitez-la à " + QUESTION_MAX + " caractères.");
     }
 
-    Description description = descripteur.decrire(image, questionNettoyee);
+    List<Echange> historique;
+    try {
+      historique = historique(historiqueJson);
+    } catch (IllegalArgumentException e) {
+      return erreur(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    Description description = descripteur.decrire(image, questionNettoyee, historique);
     return ResponseEntity.ok(new ReponseDescription(description.texte()));
   }
+
+  /**
+   * Reconstruit l'historique de la conversation à partir du JSON envoyé par la page à chaque
+   * question de suivi : la page le fait grossir elle-même, le serveur ne garde aucun état entre les
+   * requêtes.
+   *
+   * @throws IllegalArgumentException si le JSON est illisible, trop long, ou contient un échange
+   *     invalide (réponse vide)
+   */
+  private List<Echange> historique(String historiqueJson) {
+    if (historiqueJson == null || historiqueJson.isBlank()) {
+      return List.of();
+    }
+    List<EchangeJson> bruts;
+    try {
+      bruts = JSON.readValue(historiqueJson, new TypeReference<List<EchangeJson>>() {});
+    } catch (JsonProcessingException e) {
+      throw new IllegalArgumentException("L'historique de la conversation est invalide.");
+    }
+    if (bruts.size() > HISTORIQUE_MAX) {
+      throw new IllegalArgumentException(
+          "La conversation est trop longue. Recommencez avec une nouvelle image.");
+    }
+    List<Echange> resultat = new ArrayList<>();
+    try {
+      for (EchangeJson brut : bruts) {
+        resultat.add(new Echange(brut.question(), brut.reponse()));
+      }
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException("L'historique de la conversation est invalide.");
+    }
+    return resultat;
+  }
+
+  /** Forme attendue d'un élément de l'historique envoyé en JSON par la page. */
+  private record EchangeJson(String question, String reponse) {}
 
   @ExceptionHandler(MaxUploadSizeExceededException.class)
   public ResponseEntity<ReponseDescription> fichierTropGros() {
