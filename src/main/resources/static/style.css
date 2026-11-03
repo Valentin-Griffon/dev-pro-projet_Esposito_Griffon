@@ -1,0 +1,156 @@
+/* Style pensé pour les personnes malvoyantes : fort contraste, texte grand,
+   zones cliquables larges, focus très visible, mise en page simple en une colonne. */
+
+:root {
+    --fond: #ffffff;
+    --texte: #111111;
+    --accent: #0b3d91;
+    --accent-texte: #ffffff;
+    --bordure: #111111;
+    --focus: #ffbf00;
+    --erreur: #8a0000;
+}
+
+/* Thème sombre à fort contraste si le système le demande */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --fond: #000000;
+        --texte: #ffffff;
+        --accent: #ffd400;
+        --accent-texte: #000000;
+        --bordure: #ffffff;
+        --focus: #00e5ff;
+        --erreur: #ff8a80;
+    }
+}
+
+/* Renforce les contrastes si l'utilisateur les a demandés au système */
+@media (prefers-contrast: more) {
+    :root {
+        --fond: #000000;
+        --texte: #ffffff;
+        --accent: #ffffff;
+        --accent-texte: #000000;
+        --bordure: #ffffff;
+        --focus: #ffff00;
+    }
+}
+
+/* La taille de base suit le réglage du navigateur, et le texte se redimensionne sans casser la page */
+html {
+    font-size: 125%;
+}
+
+body {
+    background: var(--fond);
+    color: var(--texte);
+    font-family: Verdana, Arial, sans-serif;
+    line-height: 1.7;
+    letter-spacing: .02em;
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+}
+
+h1 {
+    font-size: 2rem;
+    line-height: 1.3;
+    border-bottom: 4px solid var(--bordure);
+    padding-bottom: .5rem;
+}
+
+label {
+    display: block;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-top: 1.5rem;
+}
+
+input[type="file"],
+input[type="text"] {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 3rem;
+    margin-top: .5rem;
+    padding: .6rem .75rem;
+    font: inherit;
+    color: var(--texte);
+    background: var(--fond);
+    border: 3px solid var(--bordure);
+    border-radius: .25rem;
+}
+
+/* Boutons : grands, texte lisible, séparés pour éviter les clics manqués */
+button {
+    min-height: 3rem;
+    min-width: 3rem;
+    margin: 1.5rem .75rem 0 0;
+    padding: .6rem 1.25rem;
+    font: inherit;
+    font-weight: 700;
+    color: var(--accent-texte);
+    background: var(--accent);
+    border: 3px solid var(--bordure);
+    border-radius: .25rem;
+    cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+    text-decoration: underline;
+}
+
+/* Un bouton désactivé reste lisible : le fond vide et la bordure en pointillé ne reposent pas que sur la couleur */
+button:disabled {
+    color: var(--texte);
+    background: var(--fond);
+    border-style: dashed;
+    cursor: not-allowed;
+}
+
+/* Focus très visible, au clavier comme à la souris */
+button:focus,
+input:focus {
+    outline: 5px solid var(--focus);
+    outline-offset: 3px;
+}
+
+#statut {
+    margin-top: 2rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+/* Description : encadrée et en gros caractères, avec le texte à la ligne.
+   Les zones aria-live ne sont jamais masquées (display: none), sinon certains lecteurs d'écran ne les annoncent pas. */
+#resultat {
+    margin-top: 1rem;
+    min-height: 1.8em;
+    padding: 1rem 1.25rem;
+    font-size: 1.3rem;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    border: 3px solid var(--bordure);
+    border-left-width: 12px;
+    border-radius: .25rem;
+}
+
+/* Petits écrans et zoom important : tout reste en une colonne, les boutons occupent la largeur */
+@media (max-width: 30rem) {
+    button {
+        display: block;
+        width: 100%;
+        margin-right: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+.boutons {
+    margin-top: .5rem;
+}
