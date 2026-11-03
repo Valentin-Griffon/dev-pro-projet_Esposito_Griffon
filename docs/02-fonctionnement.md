@@ -82,7 +82,7 @@ Les réglages se trouvent dans `src/main/resources/application.properties`. Chac
 | --- | --- | --- |
 | Développement, sans modèle | `./gradlew bootRun --args='--spring.profiles.active=faux'` | non |
 | Développement, avec modèle | `./gradlew bootRun` (Ollama lancé, modèle `llava` téléchargé) | oui |
-| Docker | `docker compose up --build` (application et Ollama, profil `reel` par défaut, modèle à télécharger une fois) | oui, dans son conteneur |
+| Docker | `docker compose up --build` (application et Ollama, aucun profil par défaut, donc l'agent réel, modèle à télécharger une fois) | oui, dans son conteneur |
 | Docker, sans modèle | `PROFIL=faux docker compose up --build` | non |
 | Docker sous WSL2 avec GPU NVIDIA | `bash demarrer-wsl.sh` (configure le GPU, lance la stack, télécharge le modèle) | oui, dans son conteneur |
 | Installation Docker sur une machine vierge | `./install.sh` | oui, dans son conteneur |
