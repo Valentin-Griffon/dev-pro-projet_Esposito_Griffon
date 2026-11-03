@@ -27,7 +27,7 @@ Le parcours minimal du sujet tient en cinq étapes :
 | « Arrêter la lecture » | coupe la lecture en cours |
 | Choix d'un autre fichier, puis « Analyser » | nouvelle analyse |
 
-Les boutons sont natifs, donc utilisables au clavier avec Tab et Entrée.
+Les boutons sont natifs, donc utilisables au clavier avec Tab et Entrée. Quand un contrôle reçoit le focus, la page annonce à voix haute son rôle et ce que fait Entrée. La touche Échap coupe la voix.
 
 ## 3. API REST
 
@@ -82,9 +82,8 @@ Les réglages se trouvent dans `src/main/resources/application.properties`. Chac
 | --- | --- | --- |
 | Développement, sans modèle | `./gradlew bootRun --args='--spring.profiles.active=faux'` | non |
 | Développement, avec modèle | `./gradlew bootRun` (Ollama lancé, modèle `llava` téléchargé) | oui |
-| Docker | `docker compose up --build` (application et Ollama, profil `reel` par défaut, modèle à télécharger une fois) | oui, dans son conteneur |
+| Docker | `docker compose up --build` (application et Ollama, aucun profil par défaut, donc l'agent réel, modèle à télécharger une fois) | oui, dans son conteneur |
 | Docker, sans modèle | `PROFIL=faux docker compose up --build` | non |
-| Docker sous WSL2 avec GPU NVIDIA | `bash demarrer-wsl.sh` (configure le GPU, lance la stack, télécharge le modèle) | oui, dans son conteneur |
 | Installation Docker sur une machine vierge | `./install.sh` | oui, dans son conteneur |
 
 ## 7. Démarrage et choix de l'agent
@@ -112,10 +111,10 @@ Les 36 tests vérifient la validation des images, la fausse et la vraie impléme
 ## 10. Structure du projet
 
 ```
-ProjetJavaPro/
+dev-pro-projet_Esposito_Griffon/
 ├── Dockerfile, docker-compose.yml, .dockerignore   conteneurisation
 ├── install.sh                                       installation Docker
-├── demarrer-wsl.sh                                  lancement sous WSL2 avec GPU NVIDIA
+├── demarrer-wsl.sh                                  script personnel (pont WSL2 vers le réseau Windows), non nécessaire
 ├── build.gradle, settings.gradle, gradlew           construction
 ├── CLAUDE.md                                        règles du projet (Git, versions, conteneurs)
 ├── docs/                                            cette documentation
@@ -125,7 +124,7 @@ ProjetJavaPro/
 │   └── web/          contrôleur REST
 ├── src/main/resources/
 │   ├── application.properties
-│   └── static/       index.html, app.js
+│   └── static/       index.html, style.css, app.js
 └── src/test/java/    tests unitaires et de contrôleur
 ```
 

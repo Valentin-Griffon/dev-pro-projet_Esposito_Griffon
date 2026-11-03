@@ -27,8 +27,8 @@ services:
     environment:
       # Ollama : par défaut le conteneur ci-dessus ; pour un Ollama sur une autre machine,
       # définir DESCRIPTEUR_OLLAMA_HOTE (et DESCRIPTEUR_OLLAMA_PORT) et lancer avec --no-deps
-      # Avec Ollama disponible, on utilise l'implémentation réelle (tout profil différent de "faux")
-      SPRING_PROFILES_ACTIVE: ${PROFIL:-reel}
+      # Sans profil (valeur par défaut), l'implémentation réelle est utilisée ; PROFIL=faux active la fausse
+      SPRING_PROFILES_ACTIVE: ${PROFIL:-}
       DESCRIPTEUR_PORT: "8080"
       DESCRIPTEUR_OLLAMA_HOTE: ${DESCRIPTEUR_OLLAMA_HOTE:-ollama}
       DESCRIPTEUR_OLLAMA_PORT: ${DESCRIPTEUR_OLLAMA_PORT:-11434}
