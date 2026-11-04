@@ -13,6 +13,9 @@ services:
       - "11434:11434"
     volumes:
       - ollama_donnees:/root/.ollama
+    environment:
+      # Garde le modèle en mémoire : évite un long rechargement après une pause
+      OLLAMA_KEEP_ALIVE: "-1"
     restart: unless-stopped
     devices:
       - nvidia.com/gpu=all
